@@ -1,6 +1,7 @@
 import { Purchase } from "@/app/types";
 import { BASE_API_URL } from "@/global";
 import { AlertInfo } from "@/components/alert";
+import DeletePurchase from "./deletePurchase";
 import axios from "axios";
 import { cookies } from "next/headers";
 
@@ -111,6 +112,11 @@ const PurchasePage = async () => {
                                             </td>
                                             <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-bold text-green-600">
                                                 {formatPrice(purchase.total_price)}
+                                                <td className="px-4 py-3 whitespace-nowrap text-right">
+                                                    <div className="flex gap-1 justify-end">
+                                                        <DeletePurchase selectedPurchase={purchase} />
+                                                    </div>
+                                                </td>
                                             </td>
                                         </tr>
                                     ))}

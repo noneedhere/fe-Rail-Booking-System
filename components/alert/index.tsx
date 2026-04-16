@@ -1,9 +1,19 @@
-import { ReactNode } from "react"
+'use client'
+import { ReactNode, useEffect, useState } from "react"
 type Prop = {
     children: ReactNode
     title: string
+    duration?: number
 }
-export const AlertInfo = ({ children, title }: Prop) => {
+export const AlertInfo = ({ children, title, duration = 3000 }: Prop) => {
+    const [show, setShow] = useState(true)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShow(false)
+        }, duration)
+        return () => clearTimeout(timer)
+    }, [duration])
+    if (!show) return null;
     return (
         <div className="my-2 bg-sky-200 rounded-md text-sky-800 px-4 py-3 shadow-md border-l-4 border-sky-800" role="alert">
             <div className="flex gap-1">
@@ -26,7 +36,15 @@ export const AlertInfo = ({ children, title }: Prop) => {
     )
 }
 
-export const AlertSuccess = ({ children, title }: Prop) => {
+export const AlertSuccess = ({ children, title, duration = 3000 }: Prop) => {
+    const [show, setShow] = useState(true)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShow(false)
+        }, duration)
+        return () => clearTimeout(timer)
+    }, [duration])
+    if (!show) return null;
     return (
         <div className="my-2 bg-green-200 rounded-md text-sky-800 px-4 py-3 shadow-md border-l-4 border-sky-800" role="alert">
             <div className="flex gap-1">
@@ -49,7 +67,15 @@ export const AlertSuccess = ({ children, title }: Prop) => {
     )
 }
 
-export const AlertWarning = ({ children, title }: Prop) => {
+export const AlertWarning = ({ children, title, duration = 3000 }: Prop) => {
+    const [show, setShow] = useState(true)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShow(false)
+        }, duration)
+        return () => clearTimeout(timer)
+    }, [duration])
+    if (!show) return null;
     return (
         <div className="my-2 bg-yellow-100 rounded-md text-sky-800 px-4 py-3 shadow-md border-l-4 border-yellow-400" role="alert">
             <div className="flex gap-1">
@@ -72,7 +98,15 @@ export const AlertWarning = ({ children, title }: Prop) => {
     )
 }
 
-export const AlertDanger = ({ children, title }: Prop) => {
+export const AlertDanger = ({ children, title, duration = 3000 }: Prop) => {
+    const [show, setShow] = useState(true)
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShow(false)
+        }, duration)
+        return () => clearTimeout(timer)
+    }, [duration])
+    if (!show) return null;
     return (
         <div className="my-2 bg-red-200 rounded-md text-red-800 px-4 py-3 shadow-md border-l-4 border-red-800" role="alert">
             <div className="flex gap-1">
