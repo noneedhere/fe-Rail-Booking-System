@@ -296,6 +296,33 @@ const DashboardPage = () => {
                         ))}
                     </div>
 
+                    <div className="flex flex-col gap-5">
+                        <h4 className="text-xl font-semibold">Support</h4>
+                        {[
+                            { label: 'Help', target: '#help' },
+                            { label: 'Privacy Policy', target: '#privacy-policy' },
+                            { label: 'Terms & Conditions', target: '#terms-conditions' },
+                            { label: 'FAQs', href: '/customer/faqs' },
+                        ].map((item, index) => (
+                            <div key={index} className="flex flex-row items-center">
+
+                                <p
+                                    className="text-[16px] text-gray-300 hover:text-[#DE5D5B] cursor-pointer transition"
+                                    onClick={() => {
+                                        if (item.target) {
+                                            const el = document.querySelector(item.target)
+                                            if (el) el.scrollIntoView({ behavior: 'smooth' })
+                                        }
+                                        if (item.href) {
+                                            window.location.href = item.href
+                                        }
+                                    }}
+                                >
+                                    {item.label}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
                     {/* SUPPORT */}
                     <div className="flex flex-col gap-4">
                         <h4 className="text-xl font-semibold">Support</h4>
