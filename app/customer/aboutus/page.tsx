@@ -70,6 +70,64 @@ export default function AboutUsPage() {
                     </div>
                 </div>
             </section>
+
+            <section className="w-full bg-[#F1F2F6] py-16 flex flex-col items-center">
+
+                {/* MENU */}
+                <div className="flex flex-wrap justify-center gap-6 mb-10">
+                    {[
+                        "Cheap Train Tickets",
+                        "Train Types",
+                        "Trains in Europe",
+                        "Global Train Travel",
+                        "FAQs"
+                    ].map((item, index) => (
+                        <button
+                            key={index}
+                            className="px-8 py-3 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-300 transition"
+                        >
+                            {item}
+                        </button>
+                    ))}
+                </div>
+
+                {/* CONTENT */}
+                <div className="max-w-3xl text-center px-6">
+                    <h2 className="text-3xl md:text-4xl font-bold text-[#1D2B53] mb-6">
+                        Discover the World by Train
+                    </h2>
+
+                    <p className="text-gray-600 text-sm md:text-base leading-relaxed mb-6">
+                        Travel across cities and countries easily using modern train networks.
+                        Train journeys offer comfort, speed, and an enjoyable travel experience.
+                    </p>
+
+                    <div className="text-left mt-6">
+                        <h3 className="font-semibold text-[#1D2B53] mb-2">
+                            Popular Routes
+                        </h3>
+
+                        <ul className="list-disc pl-5 text-gray-600 text-sm space-y-2">
+                            <li>
+                                <span className="font-medium text-[#1D2B53]">Paris to Milan:</span>{" "}
+                                A popular route connecting France and Italy.
+                            </li>
+                            <li>
+                                <span className="font-medium text-[#1D2B53]">Berlin to Paris:</span>{" "}
+                                Long-distance travel across major European cities.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <h2 className="text-2xl md:text-3xl font-bold text-[#1D2B53] mt-10">
+                        How to Get Cheap Train Tickets
+                    </h2>
+
+                    <p className="text-gray-600 text-sm mt-4">
+                        Plan ahead, compare prices, and choose flexible schedules to get the best deals.
+                    </p>
+                </div>
+            </section>
         </div>
     )
 }
