@@ -10,48 +10,38 @@ interface IPropMenu {
 let menuList: IPropMenu[] = [
     {
         id: `home`,
-        label: `Home`,
+        label: `Dashboard`,
         path: `/admin/dashboard`,
     },
     {
         id: `user`,
-        label: `User`,
+        label: `Users`,
         path: `/admin/user`,
     },
     {
         id: `train`,
-        label: `Train`,
+        label: `Trains`,
         path: `/admin/train`,
     },
     {
-        id: `seat`,
-        label: `Seat`,
-        path: `/admin/seat`,
-    },
-    {
         id: `carriage`,
-        label: `Carriage`,
+        label: `Carriages`,
         path: `/admin/carriage`,
     },
     {
+        id: `seat`,
+        label: `Seats`,
+        path: `/admin/seat`,
+    },
+    {
         id: `schedule`,
-        label: `Schedule`,
+        label: `Schedules`,
         path: `/admin/schedule`,
     },
     {
         id: `purchase`,
-        label: `Purchase`,
+        label: `Purchases`,
         path: `/admin/purchase`,
-    },
-    {
-        id: `customer`,
-        label: `Customer Dashboard`,
-        path: `/customer/dashboard`,
-    },
-    {
-        id: `login`,
-        label: `Logout`,
-        path: `/login`,
     },
 ]
 export default menuList;
