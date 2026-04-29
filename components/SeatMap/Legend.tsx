@@ -14,6 +14,10 @@ const Legend: React.FC = () => {
                 <span className="text-sm text-[#29303A]">Selected</span>
             </div>
             <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded bg-amber-400 border-2 border-amber-500 flex items-center justify-center text-[10px]">🔒</div>
+                <span className="text-sm text-[#29303A]">Held</span>
+            </div>
+            <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded bg-gray-400 border-2 border-gray-500"></div>
                 <span className="text-sm text-[#29303A]">Booked</span>
             </div>
