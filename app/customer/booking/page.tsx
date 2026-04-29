@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Schedule } from '@/app/types';
 import { SeatMappingData, SeatSelection, SeatMappingResponse } from '@/app/types/seatMapping';
@@ -24,38 +24,7 @@ interface BookingState {
 const CustomerBookingPage = () => {
     const router = useRouter();
 
-    const [activeTrain, setActiveTrain] = useState('whoosh')
-    const trainVideoMap: Record<string, string> = {
-        whoosh: "Whoosh.mp4",
-        local: "Local.mp4",
-        lrt: "LRT.mp4",
-        express: "Express.mp4",
-    }
-    const trainTextMap: Record<
-        string,
-        { highlight: string; line1: string; line2: string }
-    > = {
-        whoosh: {
-            highlight: "Fast",
-            line1: "Travel",
-            line2: "With Whoosh",
-        },
-        local: {
-            highlight: "Easy",
-            line1: "Local",
-            line2: "Daily Journey",
-        },
-        lrt: {
-            highlight: "Smart",
-            line1: "Way",
-            line2: "Urban Transportation",
-        },
-        express: {
-            highlight: "Best",
-            line1: "Way",
-            line2: "Premium Experience",
-        },
-    }
+    const activeTrain = 'whoosh';
 
     // Schedule list state
     const [schedules, setSchedules] = useState<Schedule[]>([]);
@@ -73,6 +42,69 @@ const CustomerBookingPage = () => {
 
     const [seatMapLoading, setSeatMapLoading] = useState(false);
     const [purchaseLoading, setPurchaseLoading] = useState(false);
+
+    // Hold timer state
+    const [holdExpiry, setHoldExpiry] = useState<Date | null>(null);
+    const [timeLeft, setTimeLeft] = useState<number>(0);
+    const [holdLoading, setHoldLoading] = useState(false);
+
+    // Track seats to release on unmount
+    const bookingRef = useRef(booking);
+    bookingRef.current = booking;
+
+    // Countdown timer effect
+    useEffect(() => {
+        if (!holdExpiry || booking.selectedSeats.length === 0) {
+            setTimeLeft(0);
+            return;
+        }
+
+        const interval = setInterval(() => {
+            const remaining = Math.max(0, holdExpiry.getTime() - Date.now());
+            setTimeLeft(remaining);
+
+            if (remaining === 0) {
+                toast.warning('Your seat hold has expired. Please select seats again.');
+                setBooking(prev => ({ ...prev, selectedSeats: [] }));
+                setHoldExpiry(null);
+                // Refresh seat map
+                if (bookingRef.current.scheduleId) {
+                    fetchSeatMapping(bookingRef.current.scheduleId);
+                }
+            }
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [holdExpiry, booking.selectedSeats.length]);
+
+    // Release holds when navigating away or unmounting
+    useEffect(() => {
+        const releaseHoldsOnUnload = () => {
+            const current = bookingRef.current;
+            if (current.selectedSeats.length > 0 && current.scheduleId) {
+                const TOKEN = getCookie("token") || "";
+                // Use fetch with keepalive for reliability on page close
+                fetch(`${BASE_API_URL}/purchase/hold`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id_schedule: current.scheduleId,
+                        seat_ids: current.selectedSeats.map(s => s.id_seat),
+                    }),
+                    keepalive: true,
+                }).catch(() => { /* best-effort, cron will clean up */ });
+            }
+        };
+
+        window.addEventListener('beforeunload', releaseHoldsOnUnload);
+        return () => {
+            window.removeEventListener('beforeunload', releaseHoldsOnUnload);
+            releaseHoldsOnUnload();
+        };
+    }, []);
 
     // Fetch schedules
     useEffect(() => {
@@ -145,26 +177,92 @@ const CustomerBookingPage = () => {
         }
     }, []);
 
-    // Handle seat selection
-    const handleSeatToggle = (seat: SeatSelection) => {
-        setBooking(prev => {
-            const exists = prev.selectedSeats.find(s => s.id_seat === seat.id_seat);
-            if (exists) {
-                return {
-                    ...prev,
-                    selectedSeats: prev.selectedSeats.filter(s => s.id_seat !== seat.id_seat),
-                };
-            } else {
-                if (prev.selectedSeats.length >= 10) {
-                    toast.warning('Maximum 10 seats per booking');
-                    return prev;
-                }
-                return {
-                    ...prev,
-                    selectedSeats: [...prev.selectedSeats, seat],
-                };
+    // Release seats helper
+    const releaseSeatsAPI = async (scheduleId: number, seatIds: number[]) => {
+        try {
+            const TOKEN = getCookie("token") || "";
+            await fetch(`${BASE_API_URL}/purchase/hold`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id_schedule: scheduleId,
+                    seat_ids: seatIds,
+                }),
+            });
+        } catch {
+            // Best effort — cron will clean up
+        }
+    };
+
+    // Handle seat selection — now calls hold API
+    const handleSeatToggle = async (seat: SeatSelection) => {
+        if (holdLoading) return;
+
+        const exists = booking.selectedSeats.find(s => s.id_seat === seat.id_seat);
+
+        if (exists) {
+            // Deselect: release hold
+            setHoldLoading(true);
+            if (booking.scheduleId) {
+                await releaseSeatsAPI(booking.scheduleId, [seat.id_seat]);
             }
-        });
+
+            setBooking(prev => {
+                const newSeats = prev.selectedSeats.filter(s => s.id_seat !== seat.id_seat);
+                if (newSeats.length === 0) {
+                    setHoldExpiry(null);
+                }
+                return { ...prev, selectedSeats: newSeats };
+            });
+            setHoldLoading(false);
+        } else {
+            // Select: hold seat
+            if (booking.selectedSeats.length >= 10) {
+                toast.warning('Maximum 10 seats per booking');
+                return;
+            }
+
+            setHoldLoading(true);
+            try {
+                const TOKEN = getCookie("token") || "";
+                const response = await fetch(`${BASE_API_URL}/purchase/hold`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${TOKEN}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id_schedule: booking.scheduleId,
+                        seat_ids: [seat.id_seat],
+                    }),
+                });
+
+                const result = await response.json();
+
+                if (result.status) {
+                    setBooking(prev => ({
+                        ...prev,
+                        selectedSeats: [...prev.selectedSeats, seat],
+                    }));
+                    // Use duration from server to calculate local expiry (avoids timezone issues)
+                    const durationMs = (result.data.hold_duration_seconds || 300) * 1000;
+                    setHoldExpiry(new Date(Date.now() + durationMs));
+                } else {
+                    toast.error(result.message || 'Seat is no longer available');
+                    // Refresh seat map to show updated availability
+                    if (booking.scheduleId) {
+                        fetchSeatMapping(booking.scheduleId);
+                    }
+                }
+            } catch (err) {
+                toast.error('Failed to hold seat. Please try again.');
+            } finally {
+                setHoldLoading(false);
+            }
+        }
     };
 
     // Handle carriage selection
@@ -173,18 +271,28 @@ const CustomerBookingPage = () => {
             ...prev,
             step: 'seats',
             selectedCarriageId: carriageId,
-            selectedSeats: [],
         }));
     };
 
-    // Handle back navigation
-    const handleBack = () => {
+    // Handle back navigation — release holds when going back
+    const handleBack = async () => {
+        const current = booking;
+
+        if (current.step === 'seats' && current.selectedSeats.length > 0 && current.scheduleId) {
+            // Release all held seats when going back from seat selection
+            await releaseSeatsAPI(
+                current.scheduleId,
+                current.selectedSeats.map(s => s.id_seat)
+            );
+            setHoldExpiry(null);
+        }
+
         setBooking(prev => {
             switch (prev.step) {
                 case 'seats':
                     return { ...prev, step: 'carriage', selectedCarriageId: null, selectedSeats: [] };
                 case 'carriage':
-                    return { ...prev, step: 'schedule', scheduleId: null, scheduleData: null };
+                    return { ...prev, step: 'schedule', scheduleId: null, scheduleData: null, selectedSeats: [] };
                 default:
                     return prev;
             }
@@ -216,6 +324,7 @@ const CustomerBookingPage = () => {
             const result = await response.json();
 
             if (result.status) {
+                setHoldExpiry(null); // Clear timer on success
                 toast.success(`Booking successful! Total: Rp ${result.data.total_price.toLocaleString('id-ID')}`);
                 // Navigate to purchase detail/receipt page
                 router.push(`/customer/purchases/${result.data.id_ticketpurchase}`);
@@ -442,6 +551,16 @@ const CustomerBookingPage = () => {
                                     {booking.scheduleData.schedule.schedule_name} • {carriage.carriage_name}
                                 </p>
                             </div>
+                            {/* Hold timer indicator in header */}
+                            {holdLoading && (
+                                <div className="flex items-center gap-2 text-sm text-amber-600">
+                                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    </svg>
+                                    Securing seat...
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -470,6 +589,7 @@ const CustomerBookingPage = () => {
                                 onBack={handleBack}
                                 isLoading={purchaseLoading}
                                 maxSeats={10}
+                                holdTimeLeft={timeLeft}
                             />
                         </div>
                     </div>

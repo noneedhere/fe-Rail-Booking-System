@@ -57,7 +57,7 @@ export interface SeatData {
     seat_num: string;
     row: number;
     col: number;
-    status: 'AVAILABLE' | 'BOOKED';
+    status: 'AVAILABLE' | 'BOOKED' | 'HELD' | 'HELD_BY_ME';
 }
 
 // Booking state types

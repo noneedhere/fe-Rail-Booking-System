@@ -36,7 +36,7 @@ const SeatMap: React.FC<SeatMapProps> = ({
     }
 
     const handleSeatClick = (seat: SeatData) => {
-        if (seat.status === 'BOOKED' || readOnly) return;
+        if (seat.status === 'BOOKED' || seat.status === 'HELD' || readOnly) return;
 
         onSeatSelect({
             id_seat: seat.id_seat,
@@ -48,9 +48,10 @@ const SeatMap: React.FC<SeatMapProps> = ({
         });
     };
 
-    const getSeatStatus = (seat: SeatData): 'AVAILABLE' | 'BOOKED' | 'SELECTED' => {
+    const getSeatStatus = (seat: SeatData): 'AVAILABLE' | 'BOOKED' | 'SELECTED' | 'HELD' => {
         if (seat.status === 'BOOKED') return 'BOOKED';
-        if (selectedSeats.includes(seat.id_seat)) return 'SELECTED';
+        if (seat.status === 'HELD') return 'HELD';
+        if (seat.status === 'HELD_BY_ME' || selectedSeats.includes(seat.id_seat)) return 'SELECTED';
         return 'AVAILABLE';
     };
 
@@ -142,6 +143,11 @@ const SeatMap: React.FC<SeatMapProps> = ({
                     {' '}available of{' '}
                     <span className="font-medium">{seats.length}</span>
                     {' '}seats
+                    {seats.filter(s => s.status === 'HELD').length > 0 && (
+                        <span className="text-amber-500 ml-2">
+                            ({seats.filter(s => s.status === 'HELD').length} held)
+                        </span>
+                    )}
                 </div>
             </div>
         </div>
