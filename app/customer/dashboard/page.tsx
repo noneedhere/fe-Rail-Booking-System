@@ -1,14 +1,13 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import { Train, TramFront, TrainFront, Search, Users, ArrowLeftRight, ArrowRight, Link } from 'lucide-react'
+import { Train, TramFront, TrainFront, ArrowRight } from 'lucide-react'
 import BlurText from '@/components/animation/blurText/page';
-import { Instagram, Twitter, Phone, Mail } from 'lucide-react'
-import { ArrowUpRight } from 'lucide-react'
+import { Instagram, Twitter, Phone } from 'lucide-react'
+import SearchBar from '@/components/SearchBar/SearchBar';
 
 const DashboardPage = () => {
     const [activeTrain, setActiveTrain] = useState('whoosh')
-    const [roundTrip, setRoundTrip] = useState(false)
     const handleAnimationComplete = () => {
         console.log('Animation completed!');
     };
@@ -128,39 +127,8 @@ const DashboardPage = () => {
                         })}
                     </div>
 
-                    <div className="mt-[25px] w-[1222px] h-[100px] bg-[#ffffff] rounded-xl flex items-center px-[68px] gap-4">
-
-                        <div className="w-[245px] h-[50px] bg-[#c9c9c9ca] flex items-center gap-2 px-4 rounded-lg">
-                            <Search size={18} className='text-black' />
-                            <input placeholder="Choose Departure" className="bg-transparent text-black outline-none text-sm w-full" />
-                        </div>
-
-                        <div className="w-[245px] h-[50px] bg-[#c9c9c9ca] flex items-center gap-2 px-4 rounded-lg">
-                            <Search size={18} className='text-black' />
-                            <input placeholder="Choose Arrival" className="bg-transparent text-black outline-none text-sm w-full" />
-                        </div>
-
-                        <div className="w-[398px] h-[50px] bg-[#c9c9c9ca] flex items-center justify-between px-6 rounded-lg">
-                            <div className="flex items-center gap-2 text-sm">
-                                <ArrowLeftRight size={18} className='text-black' />
-                                <span className='text-gray-600'>Departure</span>
-                                <span className='text-gray-600'>|</span>
-                                <span className='text-gray-600'>Return</span>
-                            </div>
-
-                            <button onClick={() => setRoundTrip(!roundTrip)} className={`w-[50px] h-[26px] rounded-full flex items-center px-1 transition ${roundTrip ? 'bg-[#DE5D5B]' : 'bg-gray-900'}`}>
-                                <div className={`w-[18px] h-[18px] bg-white rounded-full transition ${roundTrip ? 'translate-x-[22px]' : ''}`} />
-                            </button>
-                        </div>
-
-                        <div className="w-[163px] h-[50px] bg-[#c9c9c9ca] flex items-center gap-2 px-4 rounded-lg cursor-pointer">
-                            <Users size={18} className='text-black' />
-                            <span className="text-sm text-gray-600">Guest</span>
-                        </div>
-
-                        <div className="w-[57px] h-[50px] bg-[#DE5D5B] rounded-lg flex items-center justify-center cursor-pointer">
-                            <Search size={20} className="text-white" />
-                        </div>
+                    <div className="mt-[25px]">
+                        <SearchBar />
                     </div>
                 </div>
             </div>

@@ -1,59 +1,57 @@
+import { User, Schedule, Purchase } from "@/app/types";
 import { BASE_API_URL } from "@/global";
 import axios from "axios";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { FaUsers, FaTicketAlt, FaMoneyBillWave, FaCalendarCheck, FaTrain, FaClipboardList, FaArrowRight, FaChartLine } from "react-icons/fa";
 
-// --- Types ---
-interface DashboardSummary {
-    total_users: number;
-    total_bookings: number;
-    total_revenue: number;
-    active_schedules: number;
-    recent_purchases: RecentPurchase[];
-}
+// --- Data Fetching ---
+const getToken = async () => {
+    return (await cookies()).get("token")?.value;
+};
 
-interface RecentPurchase {
-    id_ticketpurchase: number;
-    buyer_name: string;
-    buyer_email: string;
-    total_price: number;
-    purchase_date: string;
-    schedule: {
-        departure: string;
-        destination: string;
-    } | null;
-}
+const getUserName = async () => {
+    const name = (await cookies()).get("name")?.value;
+    return name ? decodeURIComponent(name) : "Admin";
+};
 
-// --- Data Fetching (single optimized API call) ---
-const fetchDashboardSummary = async (): Promise<DashboardSummary> => {
-    const token = (await cookies()).get("token")?.value;
-
-    if (!token) {
-        throw new Error("No authentication token found");
-    }
-
+const fetchUsers = async (): Promise<User[]> => {
+    const token = await getToken();
+    if (!token) return [];
     try {
-        const res = await axios.get(`${BASE_API_URL}/dashboard/summary`, {
+        const res = await axios.get(`${BASE_API_URL}/user/`, {
             headers: { Authorization: `Bearer ${token}` },
         });
-
-        if (!res.data?.status || !res.data?.data) {
-            throw new Error("Invalid response from dashboard API");
-        }
-
-        return res.data.data;
-    } catch (error: any) {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-            throw new Error("Unauthorized access to dashboard");
-        }
-        throw new Error(`Failed to fetch dashboard data: ${error.message}`);
+        return res.data?.status ? res.data.data : [];
+    } catch {
+        return [];
     }
 };
 
-const getUserName = async (): Promise<string> => {
-    const name = (await cookies()).get("name")?.value;
-    return name ? decodeURIComponent(name) : "Admin";
+const fetchSchedules = async (): Promise<Schedule[]> => {
+    const token = await getToken();
+    if (!token) return [];
+    try {
+        const res = await axios.get(`${BASE_API_URL}/schedule/`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data?.status ? res.data.data : [];
+    } catch {
+        return [];
+    }
+};
+
+const fetchPurchases = async (): Promise<Purchase[]> => {
+    const token = await getToken();
+    if (!token) return [];
+    try {
+        const res = await axios.get(`${BASE_API_URL}/purchase/`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        return res.data?.status ? res.data.data : [];
+    } catch {
+        return [];
+    }
 };
 
 // --- Helpers ---
@@ -81,15 +79,25 @@ const getGreeting = () => {
 
 // --- Page ---
 const DashboardPage = async () => {
-    const [userName, summary] = await Promise.all([
+    const [userName, users, schedules, purchases] = await Promise.all([
         getUserName(),
-        fetchDashboardSummary(),
+        fetchUsers(),
+        fetchSchedules(),
+        fetchPurchases(),
     ]);
+
+    const totalUsers = users.length;
+    const totalBookings = purchases.length;
+    const totalRevenue = purchases.reduce((sum, p) => sum + (p.total_price || 0), 0);
+    const activeSchedules = schedules.filter((s) => s.status === "ACTIVED").length;
+    const recentPurchases = [...purchases]
+        .sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime())
+        .slice(0, 5);
 
     const summaryCards = [
         {
             title: "Total Users",
-            value: summary.total_users.toString(),
+            value: totalUsers.toString(),
             icon: <FaUsers />,
             color: "from-blue-500 to-blue-600",
             bgLight: "bg-blue-50",
@@ -98,7 +106,7 @@ const DashboardPage = async () => {
         },
         {
             title: "Total Bookings",
-            value: summary.total_bookings.toString(),
+            value: totalBookings.toString(),
             icon: <FaTicketAlt />,
             color: "from-emerald-500 to-emerald-600",
             bgLight: "bg-emerald-50",
@@ -107,7 +115,7 @@ const DashboardPage = async () => {
         },
         {
             title: "Total Revenue",
-            value: formatPrice(summary.total_revenue),
+            value: formatPrice(totalRevenue),
             icon: <FaMoneyBillWave />,
             color: "from-amber-500 to-orange-500",
             bgLight: "bg-amber-50",
@@ -116,7 +124,7 @@ const DashboardPage = async () => {
         },
         {
             title: "Active Schedules",
-            value: summary.active_schedules.toString(),
+            value: activeSchedules.toString(),
             icon: <FaCalendarCheck />,
             color: "from-violet-500 to-purple-600",
             bgLight: "bg-violet-50",
@@ -193,11 +201,10 @@ const DashboardPage = async () => {
                         </Link>
                     </div>
 
-                    {summary.recent_purchases.length === 0 ? (
+                    {recentPurchases.length === 0 ? (
                         <div className="p-10 text-center">
                             <FaTicketAlt className="text-4xl text-gray-200 mx-auto mb-3" />
                             <p className="text-gray-400 text-sm">No purchases yet</p>
-                            <p className="text-gray-300 text-xs mt-1">Purchases will appear here once customers start booking.</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
@@ -211,8 +218,8 @@ const DashboardPage = async () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-50">
-                                    {summary.recent_purchases.map((purchase, i) => (
-                                        <tr key={purchase.id_ticketpurchase} className="hover:bg-gray-50/50 transition-colors">
+                                    {recentPurchases.map((purchase, i) => (
+                                        <tr key={i} className="hover:bg-gray-50/50 transition-colors">
                                             <td className="px-5 py-3.5">
                                                 <div className="text-sm font-medium text-[#29303A]">{purchase.buyer_name}</div>
                                                 <div className="text-xs text-gray-400">{purchase.buyer_email}</div>
@@ -279,11 +286,11 @@ const DashboardPage = async () => {
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>
-                                <p className="text-2xl font-bold">{summary.total_bookings}</p>
-                                <p className="text-xs text-gray-400">Bookings</p>
+                                <p className="text-2xl font-bold">{schedules.length}</p>
+                                <p className="text-xs text-gray-400">Total</p>
                             </div>
                             <div>
-                                <p className="text-2xl font-bold text-emerald-400">{summary.active_schedules}</p>
+                                <p className="text-2xl font-bold text-emerald-400">{activeSchedules}</p>
                                 <p className="text-xs text-gray-400">Active</p>
                             </div>
                         </div>
