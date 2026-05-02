@@ -6,7 +6,7 @@ import { post } from "@/lib/api-bridge"
 import { getCookie } from "@/lib/client-cookies"
 import { useRouter } from "next/navigation"
 import { FormEvent, useRef, useState } from "react"
-import { toast, ToastContainer } from "react-toastify"
+import { toast } from "react-toastify"
 import { ButtonSuccess, ButtonDanger } from "@/components/button"
 import { InputGroupComponent } from "@/components/inputComponent"
 import Modal from "@/components/modal"
@@ -89,7 +89,7 @@ const AddSchedule = ({ trains }: { trains: Train[] }) => {
             const arrError = validateArrivalDate(schedule.arrival_date || '', schedule.departure_date || '')
             if (depError || arrError) {
                 setDateErrors({ departure: depError, arrival: arrError })
-                toast('Please fix the date errors before submitting', { hideProgressBar: true, containerId: `toastSchedule`, type: `warning` })
+                toast('Please fix the date errors before submitting', { hideProgressBar: true, type: `warning` })
                 return
             }
 
@@ -107,20 +107,19 @@ const AddSchedule = ({ trains }: { trains: Train[] }) => {
             const { data } = await post(url, payload, TOKEN)
             if (data?.status) {
                 setIsShow(false)
-                toast(data?.message, { hideProgressBar: true, containerId: `toastSchedule`, type: `success` })
+                toast(data?.message, { hideProgressBar: true, type: `success` })
                 setTimeout(() => router.refresh(), 1000)
             } else {
-                toast(data?.message, { hideProgressBar: true, containerId: `toastSchedule`, type: `warning` })
+                toast(data?.message, { hideProgressBar: true, type: `warning` })
             }
         } catch (error) {
             console.log(error)
-            toast(`Something went wrong`, { hideProgressBar: true, containerId: `toastSchedule`, type: `error` })
+            toast(`Something went wrong`, { hideProgressBar: true, type: `error` })
         }
     }
 
     return (
         <div>
-            <ToastContainer containerId={`toastSchedule`} />
             <ButtonSuccess type="button" onClick={() => openModal()}>
                 <div className="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">

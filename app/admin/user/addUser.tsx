@@ -6,7 +6,7 @@ import { post } from "@/lib/api-bridge"
 import { getCookie } from "@/lib/client-cookies"
 import { useRouter } from "next/navigation"
 import { FormEvent, useRef, useState } from "react"
-import { toast, ToastContainer } from "react-toastify"
+import { toast } from "react-toastify"
 import { ButtonSuccess, ButtonDanger } from "@/components/button"
 import { InputGroupComponent } from "@/components/inputComponent"
 import Modal from "@/components/modal"
@@ -62,20 +62,19 @@ const AddUser = () => {
             const { data } = await post(url, payload, TOKEN)
             if (data?.status) {
                 setIsShow(false)
-                toast(data?.message, { hideProgressBar: true, containerId: `toastUser`, type: `success` })
+                toast(data?.message, { hideProgressBar: true, type: `success` })
                 setTimeout(() => router.refresh(), 1000)
             } else {
-                toast(data?.message, { hideProgressBar: true, containerId: `toastUser`, type: `warning` })
+                toast(data?.message, { hideProgressBar: true, type: `warning` })
             }
         } catch (error) {
             console.log(error);
-            toast(`Something Wrong`, { hideProgressBar: true, containerId: `toastUser`, type: `error` })
+            toast(`Something Wrong`, { hideProgressBar: true, type: `error` })
         }
     }
 
     return (
         <div>
-            <ToastContainer containerId={`toastUser`} />
             <ButtonSuccess type="button" onClick={() => openModal()}>
                 <div className="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">

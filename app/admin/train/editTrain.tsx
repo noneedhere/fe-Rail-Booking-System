@@ -6,7 +6,7 @@ import { put } from "@/lib/api-bridge"
 import { getCookie } from "@/lib/client-cookies"
 import { useRouter } from "next/navigation"
 import { FormEvent, useRef, useState } from "react"
-import { toast, ToastContainer } from "react-toastify"
+import { toast } from "react-toastify"
 import { ButtonWarning, ButtonDanger, ButtonSuccess } from "@/components/button"
 import { InputGroupComponent } from "@/components/inputComponent"
 import Modal from "@/components/modal"
@@ -38,7 +38,7 @@ const EditTrain = ({ selectedTrain }: { selectedTrain: Train }) => {
             const { data } = await put(url, payload, TOKEN)
 
             if (data?.status) {
-                toast(data?.message, { containerId: "toastTrain", type: "success", hideProgressBar: true })
+                toast(data?.message, { type: "success", hideProgressBar: true })
                 if (file) {
                     const pictureUrl = `${BASE_API_URL}/train/picture/${train.id_train}`
                     const picturePayload = new FormData()
@@ -49,11 +49,11 @@ const EditTrain = ({ selectedTrain }: { selectedTrain: Train }) => {
                 setTimeout(() => router.refresh(), 1000)
                 
             } else {
-                toast(data?.message || "Failed to update train", { containerId: "toastTrain", type: "warning", hideProgressBar: true })
+                toast(data?.message || "Failed to update train", { type: "warning", hideProgressBar: true })
             }
         } catch (err) {
             console.error(err)
-            toast("Something went wrong", { containerId: "toastTrain", type: "error", hideProgressBar: true })
+            toast("Something went wrong", { type: "error", hideProgressBar: true })
         }
     }
 
@@ -65,20 +65,19 @@ const EditTrain = ({ selectedTrain }: { selectedTrain: Train }) => {
             payload.append("train_picture", file)
             const { data } = await put(url, payload, TOKEN)
             if (data?.status) {
-                toast(data?.message, { hideProgressBar: true, containerId: `toastTrain`, type: `success` })
+                toast(data?.message, { hideProgressBar: true, type: `success` })
                 setTimeout(() => router.refresh(), 1000)
             } else {
-                toast(data?.message, { hideProgressBar: true, containerId: `toastTrain`, type: `warning` })
+                toast(data?.message, { hideProgressBar: true, type: `warning` })
             }
         } catch (error) {
             console.log(error)
-            toast(`Failed to update picture`, { hideProgressBar: true, containerId: `toastTrain`, type: `error` })
+            toast(`Failed to update picture`, { hideProgressBar: true, type: `error` })
         }
     }
 
     return (
         <div>
-            <ToastContainer containerId="toastTrain" />
             <ButtonWarning type="button" onClick={openModal}>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
