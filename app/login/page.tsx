@@ -5,7 +5,7 @@ import { storeCookie } from "@/lib/client-cookies"
 import axios from "axios"
 import { useRouter } from "next/navigation"
 import { FormEvent, useState } from "react"
-import { toast, ToastContainer } from "react-toastify"
+import { toast } from "react-toastify"
 import { Icon } from '@iconify/react';
 
 const LoginPage = () => {
@@ -27,7 +27,6 @@ const LoginPage = () => {
 
             if (data.status) {
                 toast(data.message, {
-                    containerId: "toastLogin",
                     type: "success",
                     autoClose: 1000,
                     hideProgressBar: true,
@@ -49,14 +48,12 @@ const LoginPage = () => {
             } else {
                 toast("Email atau password salah", {
                     hideProgressBar: true,
-                    containerId: "toastLogin",
                     type: "error",
                     autoClose: 2000
                 });
             }
         } catch (error) {
             toast("Email atau password salah", {
-                containerId: "toastLogin",
                 type: "error",
                 autoClose: 2000,
             });
@@ -65,7 +62,6 @@ const LoginPage = () => {
 
     return (
         <div className="min-h-screen flex bg-white font-[Poppins]">
-            <ToastContainer containerId="toastLogin" />
             <div className="flex-1 flex flex-col justify-center px-[80px]">
 
                 <div className="flex flex-col justify-center">

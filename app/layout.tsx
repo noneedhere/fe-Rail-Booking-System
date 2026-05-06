@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
+import { ToastProvider } from "@/components/toast-provider";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -27,6 +28,7 @@ export default function RootLayout({
         style={{ fontFamily: "var(--font-poppins)" }}
       >
         {children}
+        <ToastProvider />
       </body>
     </html>
   );

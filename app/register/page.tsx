@@ -5,7 +5,7 @@ import { storeCookie } from "@/lib/client-cookies"
 import axios from "axios"
 import { useRouter } from "next/navigation"
 import { FormEvent, useState } from "react"
-import { toast, ToastContainer } from "react-toastify"
+import { toast } from "react-toastify"
 import { Icon } from '@iconify/react';
 
 const RegisterPage = () => {
@@ -28,7 +28,6 @@ const RegisterPage = () => {
 
             if (data.status) {
                 toast(data.message, {
-                    containerId: "toastRegister",
                     type: "success",
                     autoClose: 1000,
                     hideProgressBar: true,
@@ -47,7 +46,6 @@ const RegisterPage = () => {
             } else {
                 toast("Registration failed. Please try again.", {
                     hideProgressBar: true,
-                    containerId: "toastRegister",
                     type: "error",
                     autoClose: 2000
                 });
@@ -55,7 +53,6 @@ const RegisterPage = () => {
         } catch (error: any) {
             const errorMessage = error.response?.data?.message || "Registration failed. Email might already be registered.";
             toast(errorMessage, {
-                containerId: "toastRegister",
                 type: "error",
                 autoClose: 2000,
             });
@@ -64,7 +61,6 @@ const RegisterPage = () => {
 
     return (
         <div className="min-h-screen flex bg-white font-[Poppins]">
-            <ToastContainer containerId="toastRegister" />
             <div className="flex-1 flex flex-col justify-center px-[80px]">
 
                 {/* Title */}

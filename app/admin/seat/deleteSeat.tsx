@@ -6,7 +6,7 @@ import { drop } from "@/lib/api-bridge"
 import { getCookie } from "@/lib/client-cookies"
 import { useRouter } from "next/navigation"
 import { FormEvent, useState } from "react"
-import { toast, ToastContainer } from "react-toastify"
+import { toast } from "react-toastify"
 import { ButtonDanger, ButtonSuccess } from "@/components/button"
 import Modal from "@/components/modal"
 
@@ -26,14 +26,14 @@ const DeleteSeat = ({ selectedSeat }: { selectedSeat: Seat }) => {
             const { data } = await drop(url, TOKEN)
             if (data?.status) {
                 setIsShow(false)
-                toast(data?.message, { hideProgressBar: true, containerId: `toastSeat`, type: `success` })
+                toast(data?.message, { hideProgressBar: true, type: `success` })
                 setTimeout(() => router.refresh(), 1000)
             } else {
-                toast(data?.message, { hideProgressBar: true, containerId: `toastSeat`, type: `warning` })
+                toast(data?.message, { hideProgressBar: true, type: `warning` })
             }
         } catch (error) {
             console.log(error)
-            toast(`Something went wrong`, { hideProgressBar: true, containerId: `toastSeat`, type: `error` })
+            toast(`Something went wrong`, { hideProgressBar: true, type: `error` })
         }
     }
 
@@ -41,7 +41,6 @@ const DeleteSeat = ({ selectedSeat }: { selectedSeat: Seat }) => {
 
     return (
         <div>
-            <ToastContainer containerId={`toastSeat`} />
             <div className="relative group">
                 <ButtonDanger
                     type="button"
