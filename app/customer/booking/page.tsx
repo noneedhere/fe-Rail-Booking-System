@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useEffect, useState, useCallback, useRef, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Schedule } from '@/app/types';
 import { SeatMappingData, SeatSelection, SeatMappingResponse } from '@/app/types/seatMapping';
 import { getCookie } from '@/lib/client-cookies';
@@ -23,6 +23,7 @@ interface BookingState {
 
 const CustomerBookingPage = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     const activeTrain = 'whoosh';
 
@@ -142,6 +143,7 @@ const CustomerBookingPage = () => {
         fetchSchedules();
     }, []);
 
+
     // Fetch seat mapping for schedule
     const fetchSeatMapping = useCallback(async (scheduleId: number) => {
         setSeatMapLoading(true);
@@ -176,6 +178,20 @@ const CustomerBookingPage = () => {
             setSeatMapLoading(false);
         }
     }, []);
+
+    // Auto-navigate to seat selection when ?schedule=ID is in the URL
+    const preselectedScheduleId = searchParams.get('schedule');
+    const hasAutoTriggered = useRef(false);
+
+    useEffect(() => {
+        if (preselectedScheduleId && !hasAutoTriggered.current) {
+            hasAutoTriggered.current = true;
+            const scheduleId = Number(preselectedScheduleId);
+            if (!isNaN(scheduleId) && scheduleId > 0) {
+                fetchSeatMapping(scheduleId);
+            }
+        }
+    }, [preselectedScheduleId, fetchSeatMapping]);
 
     // Release seats helper
     const releaseSeatsAPI = async (scheduleId: number, seatIds: number[]) => {
@@ -328,6 +344,19 @@ const CustomerBookingPage = () => {
                 toast.success(`Booking successful! Total: Rp ${result.data.total_price.toLocaleString('id-ID')}`);
                 // Navigate to purchase detail/receipt page
                 router.push(`/customer/purchases/${result.data.id_ticketpurchase}`);
+            } else if (response.status === 409 && result.error_code === 'SEAT_CONFLICT') {
+                // Race condition caught — seats were taken by another user
+                const conflicting = result.conflicting_seats?.join(', ') || 'some seats';
+                toast.error(
+                    `⚠️ Seats no longer available: ${conflicting}. The seat map has been refreshed.`,
+                    { autoClose: 6000 }
+                );
+                // Clear selections and refresh seat map
+                setBooking(prev => ({ ...prev, selectedSeats: [] }));
+                setHoldExpiry(null);
+                if (booking.scheduleId) {
+                    fetchSeatMapping(booking.scheduleId);
+                }
             } else {
                 toast.error(result.message || 'Booking failed');
                 // Refresh seat mapping to get updated availability
@@ -608,4 +637,17 @@ const CustomerBookingPage = () => {
     );
 };
 
-export default CustomerBookingPage;
+const BookingPage = () => (
+    <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-white">
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-12 h-12 border-4 border-gray-300 border-t-[#DE5D5B] rounded-full animate-spin"></div>
+                <p className="text-gray-500 text-lg">Loading booking...</p>
+            </div>
+        </div>
+    }>
+        <CustomerBookingPage />
+    </Suspense>
+);
+
+export default BookingPage;

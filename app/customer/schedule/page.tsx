@@ -318,9 +318,19 @@ function ScheduleContent() {
                                         </span>
                                     )}
                                 </div>
-                                <span className="text-[30px] font-bold text-[#DE5D5B]">
-                                    {formatPrice(schedule.price)}
-                                </span>
+                                <div className="flex items-center gap-4">
+                                    <span className="text-[30px] font-bold text-[#DE5D5B]">
+                                        {formatPrice(schedule.price)}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className='grid grid-cols-1 md:grid-cols-6'>
+                                <button
+                                    onClick={() => router.push(`/customer/booking?schedule=${schedule.id_schedule}`)}
+                                    className="w-full col-start-6 mt-5 px-6 py-2.5 bg-gradient-to-r from-[#DE5D5B] to-[#c94a48] text-white rounded-xl font-semibold text-sm hover:from-[#c94a48] hover:to-[#b53e3c] transition-all shadow-md hover:shadow-lg active:scale-95"
+                                >
+                                    Book Now →
+                                </button>
                             </div>
                         </div>
                     ))}
