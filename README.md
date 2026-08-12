@@ -587,5 +587,5 @@ SOFTWARE.
 ---
 
 <p align="center">
-  Made with ❤️ by <strong>Zidane Rosyidi</strong> — SMK Telkom Malang
+  Made with ❤️ by <strong>Zidane Rosyidi</strong>
 </p>
