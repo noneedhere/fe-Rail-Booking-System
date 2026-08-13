@@ -587,5 +587,5 @@ SOFTWARE.
 ---
 
 <p align="center">
-  Made with ❤️ by <strong>Zidane Rosyidi</strong>
+  Made with ❤️ using Next Js & Tailwind CSS
 </p>
