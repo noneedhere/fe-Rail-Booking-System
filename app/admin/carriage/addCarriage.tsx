@@ -41,14 +41,14 @@ const AddCarriage = ({ trains }: { trains: Train[] }) => {
             const { data } = await post(url, payload, TOKEN)
             if (data?.status) {
                 setIsShow(false)
-                toast(data?.message, { hideProgressBar: true, type: `success` })
+                toast(data?.message, { type: `success`, autoClose: 5000 })
                 setTimeout(() => router.refresh(), 1000)
             } else {
-                toast(data?.message, { hideProgressBar: true, type: `warning` })
+                toast(data?.message, { type: `warning`, autoClose: 5000 })
             }
         } catch (error) {
             console.log(error)
-            toast(`Something went wrong`, { hideProgressBar: true, type: `error` })
+            toast(`Something went wrong`, { type: `error`, autoClose: 5000 })
         }
     }
 

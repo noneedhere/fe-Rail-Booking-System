@@ -39,13 +39,14 @@ const AddTrain = () => {
             if (file) payload.append("train_picture", file)
 
             console.log(payload)
+
             const { data } = await post(url, payload, TOKEN)
             if (data?.status) {
                 setIsShow(false)
-                toast(data?.message, { hideProgressBar: true, type: `success` })
+                toast(data?.message, { type: `success`, autoClose: 5000 })
                 setTimeout(() => router.refresh(), 1000)
             } else {
-                toast(data?.message, { hideProgressBar: true, type: `warning` })
+                toast(data?.message, { type: `warning`, autoClose: 5000 })
             }
         } catch (error) {
             console.log(error)

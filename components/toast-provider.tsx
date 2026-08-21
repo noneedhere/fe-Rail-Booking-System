@@ -18,11 +18,11 @@ export const ToastProvider = () => {
             autoClose={3000}
             hideProgressBar={false}
             newestOnTop
-            closeOnClick
-            pauseOnFocusLoss
+            closeOnClick={false}
+            closeButton={true}
+            pauseOnHover={false}
+            pauseOnFocusLoss={false}
             draggable
-            pauseOnHover
-            theme="light"
         />
     );
 };

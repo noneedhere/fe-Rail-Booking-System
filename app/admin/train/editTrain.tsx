@@ -38,7 +38,7 @@ const EditTrain = ({ selectedTrain }: { selectedTrain: Train }) => {
             const { data } = await put(url, payload, TOKEN)
 
             if (data?.status) {
-                toast(data?.message, { type: "success", hideProgressBar: true })
+                toast(data?.message, { type: "success", autoClose: 5000 })
                 if (file) {
                     const pictureUrl = `${BASE_API_URL}/train/picture/${train.id_train}`
                     const picturePayload = new FormData()
@@ -49,11 +49,11 @@ const EditTrain = ({ selectedTrain }: { selectedTrain: Train }) => {
                 setTimeout(() => router.refresh(), 1000)
                 
             } else {
-                toast(data?.message || "Failed to update train", { type: "warning", hideProgressBar: true })
+                toast(data?.message || "Failed to update train", { type: "warning", autoClose: 5000 })
             }
         } catch (err) {
             console.error(err)
-            toast("Something went wrong", { type: "error", hideProgressBar: true })
+            toast("Something went wrong", { type: "error", autoClose: 5000 })
         }
     }
 
@@ -65,10 +65,10 @@ const EditTrain = ({ selectedTrain }: { selectedTrain: Train }) => {
             payload.append("train_picture", file)
             const { data } = await put(url, payload, TOKEN)
             if (data?.status) {
-                toast(data?.message, { hideProgressBar: true, type: `success` })
+                toast(data?.message, { type: `success`, autoClose: 5000 })
                 setTimeout(() => router.refresh(), 1000)
             } else {
-                toast(data?.message, { hideProgressBar: true, type: `warning` })
+                toast(data?.message, { type: `warning`, autoClose: 5000 })
             }
         } catch (error) {
             console.log(error)

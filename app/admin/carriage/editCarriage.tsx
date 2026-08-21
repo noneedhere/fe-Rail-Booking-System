@@ -37,15 +37,15 @@ const EditCarriage = ({ selectedCarriage, trains }: { selectedCarriage: Carriage
             const { data } = await put(url, payload, TOKEN)
 
             if (data?.status) {
-                toast(data?.message, { type: "success", hideProgressBar: true })
+                toast(data?.message, { type: "success", autoClose: 5000 })
                 setIsShow(false)
                 setTimeout(() => router.refresh(), 1000)
             } else {
-                toast(data?.message || "Failed to update carriage", { type: "warning", hideProgressBar: true })
+                toast(data?.message || "Failed to update carriage", { type: "warning", autoClose: 5000 })
             }
         } catch (err) {
             console.error(err)
-            toast("Something went wrong", { type: "error", hideProgressBar: true })
+            toast("Something went wrong", { type: "error", autoClose: 5000 })
         }
     }
 
